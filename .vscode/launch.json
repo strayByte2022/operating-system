@@ -5,11 +5,11 @@
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
-      "args": ["sched_1"],
-      "stopAtEntry": true,
+      "args": [],
+      "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/linhvuong123/Downloads/assignment_source_hk231(2)/ossim_source_code_part2_hk231_paging",
-      "program": "/home/linhvuong123/Downloads/assignment_source_hk231(2)/ossim_source_code_part2_hk231_paging/os",
+      "cwd": "/home/linhvuong123/Downloads/assignment_source_hk231(2)/ossim_source_code_part2_hk231_paging/src",
+      "program": "/home/linhvuong123/Downloads/assignment_source_hk231(2)/ossim_source_code_part2_hk231_paging/src/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
@@ -18,8 +18,7 @@
           "text": "-enable-pretty-printing",
           "ignoreFailures": true
         }
-      ],
-      "preLaunchTask": "build"
+      ]
     }
   ]
 }
