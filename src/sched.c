@@ -2,7 +2,7 @@
 #include "queue.h"
 #include "sched.h"
 #include <pthread.h>
-
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 static struct queue_t ready_queue;
@@ -11,8 +11,10 @@ static pthread_mutex_t queue_lock;
 
 #ifdef MLQ_SCHED
 static struct queue_t mlq_ready_queue[MAX_PRIO];
+extern int time_slot;
+static int run_slot[MAX_PRIO];
 #endif
-int run_slot[MAX_PRIO];
+
 int queue_empty(void) {
 #ifdef MLQ_SCHED
 	unsigned long prio;
@@ -29,9 +31,9 @@ void init_scheduler(void) {
 
 	for (i = 0; i < MAX_PRIO; i ++)
 		mlq_ready_queue[i].size = 0;
-	for (int prio = MAX_PRIO; prio > 0; prio--)
+	for(int prio = 0 ; prio < MAX_PRIO; prio++)
 	{
-		run_slot[MAX_PRIO-prio] = prio;
+		run_slot[prio] = MAX_PRIO - prio;
 	}
 #endif
 	ready_queue.size = 0;
@@ -46,36 +48,62 @@ void init_scheduler(void) {
  *  We implement stateful here using transition technique
  *  State representation   prio = 0 .. MAX_PRIO, curr_slot = 0..(MAX_PRIO - prio)
  */
-struct pcb_t * get_mlq_proc(void) {
-	struct pcb_t * proc = NULL;
+void queue_time_reset(void)
+{
+	for(int prio = 0 ; prio < MAX_PRIO; prio++)
+	{
+		run_slot[prio] = MAX_PRIO - prio;
+	}
+}
+struct pcb_t *get_mlq_proc(void)
+{
+	struct pcb_t *proc = NULL;
 	/*TODO: get a process from PRIORITY [ready_queue].
 	 * Remember to use lock to protect the queue.
 	 * */
 
-
 	pthread_mutex_lock(&queue_lock);
+	again:
+	bool reset = false;
 	int i;
-	for( i = 0; i < MAX_PRIO; i++ )
+	for (i = 0; i < MAX_PRIO; i++)
 	{
-		if(!empty(&mlq_ready_queue[i]))
+		if (!empty(&mlq_ready_queue[i]))
 		{
-			if(run_slot[i]>0)
+			if (run_slot[i] > 0)
 			{
-				proc = dequeue(&mlq_ready_queue[i]);
+
+				reset = false;
 				break;
+			}
+			else
+			{
+				reset = true;
 			}
 		}
 	}
-	if(run_slot[i]> (MAX_PRIO-i))
+	if (i == MAX_PRIO)
 	{
-		run_slot[i]-=(MAX_PRIO-i);
+		if (reset == true)
+		{
+			queue_time_reset();
+			goto again;
+		}
+		pthread_mutex_unlock(&queue_lock);
+		return NULL;
+	}
+	proc = dequeue(&mlq_ready_queue[i]);
+
+	if (run_slot[i] > time_slot)
+	{
+		run_slot[i] -= time_slot;
 	}
 	else
 	{
 		run_slot[i] = 0;
 	}
 	pthread_mutex_unlock(&queue_lock);
-	return proc;	
+	return proc;
 }
 
 void put_mlq_proc(struct pcb_t * proc) {

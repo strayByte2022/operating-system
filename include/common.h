@@ -73,6 +73,7 @@ struct pcb_t {
 #ifdef MLQ_SCHED
 	// Priority on execution (if supported), on-fly aka. changeable
 	// and this vale overwrites the default priority when it existed
+	uint32_t slot_left;
 	uint32_t prio;     
 #endif
 #ifdef MM_PAGING
