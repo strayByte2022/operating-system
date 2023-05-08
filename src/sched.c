@@ -63,16 +63,19 @@ struct pcb_t *get_mlq_proc(void)
 	 * */
 
 	pthread_mutex_lock(&queue_lock);
-	again:
+	
 	bool reset = false;
 	int i;
 	for (i = 0; i < MAX_PRIO; i++)
 	{
 		if (!empty(&mlq_ready_queue[i]))
 		{
+
 			if (run_slot[i] > 0)
 			{
-
+			
+			
+				proc = dequeue(&mlq_ready_queue[i]);
 				reset = false;
 				break;
 			}
@@ -82,17 +85,19 @@ struct pcb_t *get_mlq_proc(void)
 			}
 		}
 	}
-	if (i == MAX_PRIO)
+	if(i == MAX_PRIO) 
 	{
-		if (reset == true)
+		//no process is found 
+		if(reset)
 		{
+			//if there still process in queue but no slot left, but hasn't finished
 			queue_time_reset();
-			goto again;
+			return get_mlq_proc();
 		}
 		pthread_mutex_unlock(&queue_lock);
 		return NULL;
 	}
-	proc = dequeue(&mlq_ready_queue[i]);
+
 
 	if (run_slot[i] > time_slot)
 	{
