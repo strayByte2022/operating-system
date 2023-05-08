@@ -23,3 +23,8 @@ git push origin <your_branch_name>
 7. Go to the repository and make a pull request.
 8. Wait for the pull request to be reviewed by the repository collaborators.
 
+
+IF not familiar with git and github, you can download the repository as a zip file, extract it and work on it as you wish.
+
+ELSE 
+watch this video: https://www.youtube.com/watch?v=_kAV059yZ_s
