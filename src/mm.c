@@ -96,9 +96,9 @@ int vmap_page_range(struct pcb_t *caller, // process call
 
   for(pgit = addr; pgit < pgnum * PAGING_PAGESZ; pgit += PAGING_PAGESZ)
   {
-     caller->mm->pgd[pgn] = fpit->fp_next;
-      fpit = fpit->fp_next;
-      
+    caller->mm->pgd[pgit] = fpit->fpn; // set the page table entry to the frame number
+    fpit = fpit->fp_next; // move to the next frame
+
   }
   ret_rg->rg_end = pgit; // set the end of the region to the last page
   /* TODO map range of frame to address space 
@@ -132,11 +132,18 @@ int alloc_pages_range(struct pcb_t *caller, int req_pgnum, struct framephy_struc
   /*TODO:*/
   for(pgit = 0; pgit < req_pgnum; pgit++)
   {
-    if(MEMPHY_get_freefp(caller->mram, &fpn) == 0)
+    if(MEMPHY_get_freefp(caller->mram, &fpn) == 0) //if mram is not null 
    {
-     
+     struct framephy_struct*newfp_str = malloc(sizeof(struct framephy_struct));
+      newfp_str->fpn = fpn;
+      newfp_str->fp_next = *frm_lst; //set the next frame to the given frame
+      *frm_lst = newfp_str; 
 
-   } else {  // ERROR CODE of obtaining somes but not enough frames
+      
+
+   } else {  
+      return -1;
+    // ERROR CODE of obtaining somes but not enough frames
    } 
  }
 
