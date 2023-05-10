@@ -61,7 +61,7 @@ struct mm_struct {
  * FRAME/MEM PHY struct
  */
 struct framephy_struct { 
-   int fpn;
+   int fpn; // frame number
    struct framephy_struct *fp_next;
 
    /* Resereed for tracking allocated framed */
