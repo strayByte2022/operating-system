@@ -64,7 +64,7 @@ struct vm_rg_struct *get_symrg_byid(struct mm_struct *mm, int rgid)
 {
   if(rgid < 0 || rgid > PAGING_MAX_SYMTBL_SZ)
     return NULL;
-
+    
   return &mm->symrgtbl[rgid];
 }
 
@@ -90,8 +90,9 @@ int __alloc(struct pcb_t *caller, int vmaid, int rgid, int size, int *alloc_addr
 
     return 0;
   }
-
+  
   /* TODO get_free_vmrg_area FAILED handle the region management (Fig.6)*/
+
 
   /*Attempt to increate limit to get space */
   struct vm_area_struct *cur_vma = get_vma_by_num(caller->mm, vmaid);
@@ -104,6 +105,7 @@ int __alloc(struct pcb_t *caller, int vmaid, int rgid, int size, int *alloc_addr
   /* TODO INCREASE THE LIMIT
    * inc_vma_limit(caller, vmaid, inc_sz)
    */
+
   inc_vma_limit(caller, vmaid, inc_sz);
 
   /*Successful increase limit */
@@ -130,9 +132,12 @@ int __free(struct pcb_t *caller, int vmaid, int rgid)
     return -1;
 
   /* TODO: Manage the collect freed region to freerg_list */
+  rgnode.rg_start = caller->mm->symrgtbl[rgid].rg_start;
+  rgnode.rg_end = caller->mm->symrgtbl[rgid].rg_end;
 
   /*enlist the obsoleted memory region */
   enlist_vm_freerg_list(caller->mm, rgnode);
+  
 
   return 0;
 }

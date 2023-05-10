@@ -160,8 +160,12 @@ int MEMPHY_dump(struct memphy_struct * mp)
     /*TODO dump memphy contnt mp->storage 
      *     for tracing the memory content
      */
+   BYTE * dumpAss = mp->storage;
+   if(dumpAss == NULL)
+      return -1;
 
-    return 0;
+   return 0;
+
 }
 
 int MEMPHY_put_freefp(struct memphy_struct *mp, int fpn)

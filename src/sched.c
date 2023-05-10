@@ -100,6 +100,7 @@ struct pcb_t *get_mlq_proc(void)
 
 
 	if (run_slot[i] > time_slot)
+	
 	{
 		run_slot[i] -= time_slot;
 	}

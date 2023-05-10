@@ -99,7 +99,17 @@ int vmap_page_range(struct pcb_t *caller, // process call
    *      [addr to addr + pgnum*PAGING_PAGESZ
    *      in page table caller->mm->pgd[]
    */
+  
+  /*
+  It maps virtual address to the new frame to extend the vm_area size. 
+  Check this step in allocation procedure, you reach this function because the free region list does not have any empty region that match your allocation demand.
+  */
 
+  for(pgit = 0; pgit < pgnum; pgit++)
+  {
+        
+     
+  }
    /* Tracking for later page replacement activities (if needed)
     * Enqueue new usage page */
    enlist_pgn_node(&caller->mm->fifo_pgn, pgn+pgit);
@@ -119,7 +129,7 @@ int alloc_pages_range(struct pcb_t *caller, int req_pgnum, struct framephy_struc
 {
   int pgit, fpn;
   //struct framephy_struct *newfp_str;
-
+  /*TODO: */
   for(pgit = 0; pgit < req_pgnum; pgit++)
   {
     if(MEMPHY_get_freefp(caller->mram, &fpn) == 0)
