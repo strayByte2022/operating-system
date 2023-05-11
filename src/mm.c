@@ -94,7 +94,7 @@ int vmap_page_range(struct pcb_t *caller, // process call
   fpit = fpit->fp_next;
   ret_rg->rg_end = ret_rg->rg_start = addr; // at least the very first space is usable
 
-  for(pgit = addr; pgit < pgnum * PAGING_PAGESZ; pgit += PAGING_PAGESZ)
+  for(pgit = addr; pgit <= pgnum * PAGING_PAGESZ; pgit += PAGING_PAGESZ)
   {
     caller->mm->pgd[pgit] = fpit->fpn; // set the page table entry to the frame number
     fpit = fpit->fp_next; // move to the next frame

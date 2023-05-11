@@ -407,7 +407,15 @@ int validate_overlap_vm_area(struct pcb_t *caller, int vmaid, int vmastart, int 
   //struct vm_area_struct *vma = caller->mm->mmap;
 
   /* TODO validate the planned memory area is not overlapped */
-
+  
+  for(int i = vmastart; i < vmaend; i++ )
+  {
+    if(caller->mm->mmap[i].vm_id == vmaid)
+    {
+      return -1;
+    }
+  }
+  
   return 0;
 }
 
@@ -453,7 +461,11 @@ int find_victim_page(struct mm_struct *mm, int *retpgn)
 
   /* TODO: Implement the theorical mechanism to find the victim page */
   
-  
+  //first in first out
+     
+
+
+
   free(pg);
 
   return 0;
