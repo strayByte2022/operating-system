@@ -53,11 +53,11 @@ int pte_set_swap(uint32_t *pte, int swptyp, int swpoff)
 {
   SETBIT(*pte, PAGING_PTE_PRESENT_MASK);
   SETBIT(*pte, PAGING_PTE_SWAPPED_MASK);
-
+  
   SETVAL(*pte, swptyp, PAGING_PTE_SWPTYP_MASK, PAGING_PTE_SWPTYP_LOBIT);
   SETVAL(*pte, swpoff, PAGING_PTE_SWPOFF_MASK, PAGING_PTE_SWPOFF_LOBIT);
 
-  return 0;
+  return 0; 
 }
 
 /* 
@@ -93,18 +93,20 @@ int vmap_page_range(struct pcb_t *caller, // process call
   fpit->fp_next  = frames; // set the next frame to the given frame
   fpit = fpit->fp_next;
   ret_rg->rg_end = ret_rg->rg_start = addr; // at least the very first space is usable
-
+  /**
   for(pgit = addr; pgit <= pgnum * PAGING_PAGESZ; pgit += PAGING_PAGESZ)
   {
     caller->mm->pgd[pgit] = fpit->fpn; // set the page table entry to the frame number
     fpit = fpit->fp_next; // move to the next frame
 
   }
-  ret_rg->rg_end = pgit; // set the end of the region to the last page
+  */
+ // ret_rg->rg_end = pgit; // set the end of the region to the last page
   /* TODO map range of frame to address space 
    *      [addr to addr + pgnum*PAGING_PAGESZ
    *      in page table caller->mm->pgd[]
    */
+
   /*
   It maps virtual address to the new frame to extend the vm_area size. 
   Check this step in allocation procedure, you reach this function because 
@@ -138,8 +140,7 @@ int alloc_pages_range(struct pcb_t *caller, int req_pgnum, struct framephy_struc
       newfp_str->fpn = fpn;
       newfp_str->fp_next = *frm_lst; //set the next frame to the given frame
       *frm_lst = newfp_str; 
-
-      
+ 
 
    } else {  
       return -1;
@@ -202,6 +203,7 @@ int vm_map_ram(struct pcb_t *caller, int astart, int aend, int mapstart, int inc
 int __swap_cp_page(struct memphy_struct *mpsrc, int srcfpn,
                 struct memphy_struct *mpdst, int dstfpn) 
 {
+  /*FIXME*/
   int cellidx;
   int addrsrc,addrdst;
   for(cellidx = 0; cellidx < PAGING_PAGESZ; cellidx++)

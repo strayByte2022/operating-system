@@ -191,6 +191,16 @@ int pg_getpage(struct mm_struct *mm, int pgn, int *fpn, struct pcb_t *caller)
   
     /* Get free frame in MEMSWP */
     MEMPHY_get_freefp(caller->active_mswp, &swpfpn);
+    
+    //swap copy from RAM to SWP
+    __swap_cp_page(caller->mram, vicpgn, caller->active_mswp, swpfpn);
+    //swap copy from SWP to RAM
+    __swap_cp_page(caller->active_mswp, tgtfpn, caller->mram, vicpgn);
+  
+      
+    
+
+    //swap_copy_from SWP to RAM
 
 
     /* Do swap frame from MEMRAM to MEMSWP and vice versa*/
@@ -404,18 +414,21 @@ struct vm_rg_struct* get_vm_area_node_at_brk(struct pcb_t *caller, int vmaid, in
  */
 int validate_overlap_vm_area(struct pcb_t *caller, int vmaid, int vmastart, int vmaend)
 {
-  //struct vm_area_struct *vma = caller->mm->mmap;
+  struct vm_area_struct *vma = caller->mm->mmap;
 
   /* TODO validate the planned memory area is not overlapped */
-  
-  for(int i = vmastart; i < vmaend; i++ )
+//get the upcomming vmarea
+ //check if it overlap with any
+ 
+  while(vma!=NULL)
   {
-    if(caller->mm->mmap[i].vm_id == vmaid)
+    if(vma->vm_start <= vmastart && vma->vm_end <= vmaend)
     {
+      break;
       return -1;
     }
+    vma = vma->vm_next;
   }
-  
   return 0;
 }
 
@@ -460,9 +473,13 @@ int find_victim_page(struct mm_struct *mm, int *retpgn)
   struct pgn_t *pg = mm->fifo_pgn;
 
   /* TODO: Implement the theorical mechanism to find the victim page */
+ //use FIFO to find the victim page
+
+  *retpgn = pg->pgn;
+  mm->fifo_pgn = pg->pg_next;
   
-  //first in first out
-     
+  if(mm->fifo_pgn == NULL)
+    mm->fifo_pgn = mm->fifo_pgn->pg_next;
 
 
 
