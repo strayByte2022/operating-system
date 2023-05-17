@@ -5,18 +5,18 @@
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
-      "args": ["os_1_mlq_paging"],
-      "stopAtEntry": true,
+      "args": ["os_0_mlq_paging"],
+      "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/linhvuong123/Downloads/assignment_source_hk231(2)/ossim_source_code_part2_hk231_paging/src",
-      "program": "/home/linhvuong123/Downloads/assignment_source_hk231(2)/ossim_source_code_part2_hk231_paging/os",
+      "cwd": "/home/linhvuong123/Downloads/zzz/ossim_source_code_part2_hk231_paging",
+      "program": "/home/linhvuong123/Downloads/zzz/ossim_source_code_part2_hk231_paging/os",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
           "text": "-enable-pretty-printing",
-          "ignoreFailures": false
+          "ignoreFailures": true
         }
       ]
     }

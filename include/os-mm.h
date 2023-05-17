@@ -4,7 +4,7 @@
 #define MM_PAGING
 #define PAGING_MAX_MMSWP 4 /* max number of supported swapped space */
 #define PAGING_MAX_SYMTBL_SZ 30
-
+#include <pthread.h>
 typedef char BYTE;
 typedef uint32_t addr_t;
 //typedef unsigned int uint32_t;
@@ -76,7 +76,9 @@ struct memphy_struct {
    /* Sequential device fields */ 
    int rdmflg;
    int cursor;
+   //initialize a mutex
 
+   
    /* Management structure */
    struct framephy_struct *free_fp_list;
    struct framephy_struct *used_fp_list;

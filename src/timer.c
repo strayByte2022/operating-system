@@ -1,4 +1,3 @@
-
 #include "timer.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,19 +18,20 @@ static int timer_stop = 0;
 
 
 static void * timer_routine(void * args) {
+	printf("\n------------------------------------------------------------\n");
+    printf("Time slot %3lu\n", current_time());
 	while (!timer_stop) {
-		printf("Time slot %3lu\n", current_time());
 		int fsh = 0;
 		int event = 0;
 		/* Wait for all devices have done the job in current
 		 * time slot */
 		struct timer_id_container_t * temp;
 		for (temp = dev_list; temp != NULL; temp = temp->next) {
-			pthread_mutex_lock(&temp->id.event_lock);
+			pthread_mutex_lock(&temp->id.event_lock); 
 			while (!temp->id.done && !temp->id.fsh) {
-				pthread_cond_wait(
-					&temp->id.event_cond,
-					&temp->id.event_lock
+				pthread_cond_wait(   		//
+					&temp->id.event_cond,   // wait for all the device to call next slot
+					&temp->id.event_lock    //
 				);
 			}
 			if (temp->id.fsh) {
@@ -43,13 +43,15 @@ static void * timer_routine(void * args) {
 
 		/* Increase the time slot */
 		_time++;
+		printf("\n------------------------------------------------------------\n");
+		printf("Time slot %3lu\n", current_time());
 		
 		/* Let devices continue their job */
 		for (temp = dev_list; temp != NULL; temp = temp->next) {
 			pthread_mutex_lock(&temp->id.timer_lock);
-			temp->id.done = 0;
-			pthread_cond_signal(&temp->id.timer_cond);
-			pthread_mutex_unlock(&temp->id.timer_lock);
+			temp->id.done = 0;								//
+			pthread_cond_signal(&temp->id.timer_cond); 		// signal to all devices that are waiting in the next slot
+			pthread_mutex_unlock(&temp->id.timer_lock);		//
 		}
 		if (fsh == event) {
 			break;
@@ -130,7 +132,3 @@ void stop_timer() {
 		free(temp);
 	}
 }
-
-
-
-

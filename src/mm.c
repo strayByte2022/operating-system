@@ -101,18 +101,31 @@ int vmap_page_range(struct pcb_t *caller, // process call
 
   }
   */
+  for (int pn = 0; pn < pgnum; pn++)
+  {
+    if (!fpit)
+    {
+      // printf("vmap_page_range()    !fpit\n");    // for debugging
+      break;
+    }
+
+    /* Map the frame in the list */
+    pgit++;
+    ret_rg->rg_end += PAGING_PAGESZ;
+
+    pte_set_fpn(&caller->mm->pgd[pn + pgn], fpit->fpn); // set the page table entry to the frame number
+    enlist_pgn_node(&caller->mm->fifo_pgn, pn + pgn);
+
+    fpit = fpit->fp_next;
+  }
+
  // ret_rg->rg_end = pgit; // set the end of the region to the last page
   /* TODO map range of frame to address space 
    *      [addr to addr + pgnum*PAGING_PAGESZ
    *      in page table caller->mm->pgd[]
    */
   
-  for(pgit = 0; pgit <= pgnum; pgit++)
-  {
-    caller->mm->pgd[pgn+pgit] = fpit->fpn; // set the page table entry to the frame number
-    fpit = fpit->fp_next; // move to the next frame
-  }
-  ret_rg->rg_end = pgn+pgit; // set the end of the region to the last page
+  // set the end of the region to the last page
   /*
   It maps virtual address to the new frame to extend the vm_area size. 
   Check this step in allocation procedure, you reach this function because 
@@ -132,27 +145,73 @@ int vmap_page_range(struct pcb_t *caller, // process call
  * @req_pgnum : request page num
  * @frm_lst   : frame list
  */
-
+static pthread_mutex_t alloc_pages_range_mutex = PTHREAD_MUTEX_INITIALIZER;
+static void init_alloc_pages_range_mutex(void)
+{
+  pthread_mutex_init(&alloc_pages_range_mutex, NULL);
+}
 int alloc_pages_range(struct pcb_t *caller, int req_pgnum, struct framephy_struct** frm_lst)
 {
   int pgit, fpn;
-  //struct framephy_struct *newfp_str;
-  /*TODO:*/
+  int check;
+  // struct framephy_struct *newfp_str;
+
+  // for debugging
+  // printf("\nalloc_pages_range()\n");
+
+  // Not enough RAM to alloc the required page num
+  if ((req_pgnum * PAGING_PAGESZ) > caller->mram->maxsz)
+    return -3000; 
+
+
   for(pgit = 0; pgit < req_pgnum; pgit++)
   {
-    if(MEMPHY_get_freefp(caller->mram, &fpn) == 0) //if mram is not null 
-   {
-     struct framephy_struct*newfp_str = malloc(sizeof(struct framephy_struct));
-      newfp_str->fpn = fpn;
-      newfp_str->fp_next = *frm_lst; //set the next frame to the given frame
-      *frm_lst = newfp_str; 
- 
 
-   } else {  
-      return -1;
-    // ERROR CODE of obtaining somes but not enough frames
-   } 
- }
+    if(MEMPHY_get_freefp(caller->mram, &fpn) == 0)
+    {
+      enlist_framephy_node(frm_lst, fpn);
+
+    } else 
+    {  // ERROR CODE of obtaining somes but not enough frames
+      int vicpgn, vicfpn;
+      uint32_t vicpte;
+
+      if (find_victim_page(caller->mm, &vicpgn) != 0)
+      {
+        // for debugging
+        printf("ERROR: Cannot find victim page in ram  -  alloc_pages_range\n");
+        return -1;
+
+      } else
+      {
+        vicpte = caller->mm->pgd[vicpgn];
+
+        vicfpn = GETVAL(vicpte, PAGING_PTE_FPN_MASK, 0);
+        // vicfpn = PAGING_FPN(vicpte); /*--> wrong built macro*/
+
+        int dest_fpn;
+
+        if (MEMPHY_get_freefp(caller->active_mswp, &dest_fpn) != 0)
+        {
+          printf("ERROR: Cannot get free frame from physical memory  -  alloc_pages_range()\n");
+          return -1;
+        }
+        
+        // Swap victim frame to swappthread_mutex_lock(&caller->active_mswp->mtx);
+        __swap_cp_page(caller->mram, vicfpn, caller->active_mswp, dest_fpn);
+
+        /* Update page table */
+        pte_set_swap(&caller->mm->pgd[vicpgn], 0, dest_fpn);
+        init_alloc_pages_range_mutex();
+        pthread_mutex_lock(&alloc_pages_range_mutex);
+        
+        enlist_framephy_node(&caller->active_mswp->used_fp_list, dest_fpn);
+        pthread_mutex_unlock(&alloc_pages_range_mutex);
+
+        enlist_framephy_node(frm_lst, vicfpn);
+      }
+    } 
+  }
 
   return 0;
 }
@@ -281,7 +340,16 @@ int enlist_pgn_node(struct pgn_t **plist, int pgn)
 
   return 0;
 }
+int enlist_framephy_node(struct framephy_struct **flist, int fpn)
+{
+  struct framephy_struct* fnode = malloc(sizeof(struct framephy_struct));
 
+  fnode->fpn = fpn;
+  fnode->fp_next = *flist;
+  *flist = fnode;
+
+  return 0;
+}
 int print_list_fp(struct framephy_struct *ifp)
 {
    struct framephy_struct *fp = ifp;

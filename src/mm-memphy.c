@@ -6,7 +6,7 @@
 
 #include "mm.h"
 #include <stdlib.h>
-
+#include <stdio.h>
 /*
  *  MEMPHY_mv_csr - move MEMPHY cursor
  *  @mp: memphy struct
@@ -42,7 +42,8 @@ int MEMPHY_seq_read(struct memphy_struct *mp, int addr, BYTE *value)
 
    MEMPHY_mv_csr(mp, addr);
    *value = (BYTE) mp->storage[addr];
-
+   //printf("MEMPHY_seq_read: %d\n", *value);
+   printf("MEMPHY_seq_read: %s\n", value);
    return 0;
 }
 
@@ -163,6 +164,12 @@ int MEMPHY_dump(struct memphy_struct * mp)
    BYTE * dumpAss = mp->storage;
    if(dumpAss == NULL)
       return -1;
+   //print dumpAss   
+   for(int i = 0; i < mp->maxsz; i++)
+   {
+      if(dumpAss[i] != 0)
+         printf("RAM content: %d ", dumpAss[i]);
+   }
 
    return 0;
 

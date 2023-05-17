@@ -126,6 +126,8 @@ static void * ld_routine(void * args) {
 #endif
 		printf("\tLoaded a process at %s, PID: %d PRIO: %ld\n",
 			ld_processes.path[i], proc->pid, ld_processes.prio[i]);
+
+		printf("RAM: %s\n", proc->mram->storage);
 		add_proc(proc);
 		free(ld_processes.path[i]);
 		i++;
@@ -241,6 +243,8 @@ int main(int argc, char * argv[]) {
 	mm_ld_args->mram = (struct memphy_struct *) &mram;
 	mm_ld_args->mswp = (struct memphy_struct**) &mswp;
 	mm_ld_args->active_mswp = (struct memphy_struct *) &mswp[0];
+	//print ram.storage
+	
 #endif
 
 

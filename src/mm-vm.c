@@ -334,7 +334,8 @@ int __write(struct pcb_t *caller, int vmaid, int rgid, int offset, BYTE value)
 	  return -1;
 
   pg_setval(caller->mm, currg->rg_start + offset, value, caller);
-
+  //print ram
+  
   return 0;
 }
 
@@ -351,6 +352,7 @@ int pgwrite(
   print_pgtbl(proc, 0, -1); //print max TBL
 #endif
   MEMPHY_dump(proc->mram);
+
 #endif
 
   return __write(proc, 0, destination, offset, data);
@@ -415,13 +417,13 @@ struct vm_rg_struct* get_vm_area_node_at_brk(struct pcb_t *caller, int vmaid, in
  */
 int validate_overlap_vm_area(struct pcb_t *caller, int vmaid, int vmastart, int vmaend)
 {
-  struct vm_area_struct *vma = caller->mm->mmap;
+
 
   /* TODO validate the planned memory area is not overlapped */
 //get the upcomming vmarea
  //check if it overlap with any
  
- 
+
   return 0;
 }
 

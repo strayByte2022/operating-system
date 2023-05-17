@@ -128,6 +128,7 @@ int read_mem(addr_t address, struct pcb_t * proc, BYTE * data) {
 	addr_t physical_addr;
 	if (translate(address, &physical_addr, proc)) {
 		*data = _ram[physical_addr];
+	
 		return 0;
 	}else{
 		return 1;
@@ -138,6 +139,7 @@ int write_mem(addr_t address, struct pcb_t * proc, BYTE data) {
 	addr_t physical_addr;
 	if (translate(address, &physical_addr, proc)) {
 		_ram[physical_addr] = data;
+
 		return 0;
 	}else{
 		return 1;
@@ -163,6 +165,10 @@ void dump(void) {
 				
 				if (_ram[j] != 0) {
 					printf("\t%05x: %02x\n", j, _ram[j]);
+					//prinf the value of ram
+					int toint = (int)_ram[j];
+					printf("RAM value: %d", toint);
+
 				}
 					
 			}

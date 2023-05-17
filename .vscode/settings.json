@@ -2,7 +2,8 @@
   "files.associations": {
     "os-cfg.h": "c",
     "pthread.h": "c",
-    "type_traits": "cpp"
+    "type_traits": "cpp",
+    "cpu.h": "c"
   },
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.cCompilerPath": "gcc",
