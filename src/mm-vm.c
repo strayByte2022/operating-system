@@ -112,6 +112,7 @@ int __alloc(struct pcb_t *caller, int vmaid, int rgid, int size, int *alloc_addr
   caller->mm->symrgtbl[rgid].rg_start = old_sbrk;
   caller->mm->symrgtbl[rgid].rg_end = old_sbrk + size;
 
+
   *alloc_addr = old_sbrk;
 
   return 0;
@@ -420,15 +421,7 @@ int validate_overlap_vm_area(struct pcb_t *caller, int vmaid, int vmastart, int 
 //get the upcomming vmarea
  //check if it overlap with any
  
-  while(vma!=NULL)
-  {
-    if(vma->vm_start <= vmastart && vma->vm_end <= vmaend)
-    {
-      break;
-      return -1;
-    }
-    vma = vma->vm_next;
-  }
+ 
   return 0;
 }
 
@@ -499,7 +492,8 @@ int get_free_vmrg_area(struct pcb_t *caller, int vmaid, int size, struct vm_rg_s
   struct vm_area_struct *cur_vma = get_vma_by_num(caller->mm, vmaid);
 
   struct vm_rg_struct *rgit = cur_vma->vm_freerg_list;
-
+  rgit->rg_start = cur_vma->vm_freerg_list->rg_start;
+  rgit->rg_end = cur_vma->vm_freerg_list->rg_end;
   if (rgit == NULL)
     return -1;
 

@@ -91,7 +91,7 @@ int vmap_page_range(struct pcb_t *caller, // process call
   int pgit = 0; //
   int pgn = PAGING_PGN(addr); // get page number of the given address
   fpit->fp_next  = frames; // set the next frame to the given frame
-  fpit = fpit->fp_next;
+  fpit->fpn = frames->fpn; // set the frame number to the given frame number
   ret_rg->rg_end = ret_rg->rg_start = addr; // at least the very first space is usable
   /**
   for(pgit = addr; pgit <= pgnum * PAGING_PAGESZ; pgit += PAGING_PAGESZ)
@@ -106,7 +106,13 @@ int vmap_page_range(struct pcb_t *caller, // process call
    *      [addr to addr + pgnum*PAGING_PAGESZ
    *      in page table caller->mm->pgd[]
    */
-
+  
+  for(pgit = 0; pgit <= pgnum; pgit++)
+  {
+    caller->mm->pgd[pgn+pgit] = fpit->fpn; // set the page table entry to the frame number
+    fpit = fpit->fp_next; // move to the next frame
+  }
+  ret_rg->rg_end = pgn+pgit; // set the end of the region to the last page
   /*
   It maps virtual address to the new frame to extend the vm_area size. 
   Check this step in allocation procedure, you reach this function because 
